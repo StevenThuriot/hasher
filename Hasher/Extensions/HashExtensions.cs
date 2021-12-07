@@ -1,10 +1,29 @@
 ﻿using SimpleHasher.Internals;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SimpleHasher.Extensions;
 
 public static class HashExtensions
 {
     private static readonly HashOptions s_options = new();
+
+    internal static bool IsNullOrPrimitive<T>(this T value, [NotNullWhen(true)] out int hash)
+    {
+        if (value is null)
+        {
+            hash = 0;
+            return true;
+        }
+
+        if (typeof(T).IsPrimitive || typeof(T) == typeof(string) || typeof(Task).IsAssignableFrom(typeof(T)))
+        {
+            hash = value.GetHashCode();
+            return true;
+        }
+
+        hash = default;
+        return false;
+    }
 
     /// <summary>
     /// Simple hashresolver, no nesting or anything else fancy the registered service can do.
@@ -17,9 +36,9 @@ public static class HashExtensions
     /// <returns>A hash code for this value based on its properties</returns>
     public static int ResolveHash<T>(this T value)
     {
-        if (typeof(T).IsPrimitive || typeof(T) == typeof(string) || typeof(Task).IsAssignableFrom(typeof(T)))
+        if (value.IsNullOrPrimitive(out int hash))
         {
-            return value?.GetHashCode() ?? 0;
+            return hash;
         }
 
         return DefaultHasher<T>.Get(value, null!, s_options);
@@ -42,6 +61,11 @@ public static class HashExtensions
             throw new ArgumentNullException(nameof(propertyNames));
         }
 
+        if (value.IsNullOrPrimitive(out int hash))
+        {
+            return hash;
+        }
+
         return DefaultHasher<T>.Get(value, null!, s_options, propertyNames);
     }
 
@@ -62,7 +86,12 @@ public static class HashExtensions
             throw new ArgumentNullException(nameof(properties));
         }
 
-        return new SynchronousHasher<T>(s_options, properties).Get(value, null!);
+        if (value.IsNullOrPrimitive(out int hash))
+        {
+            return hash;
+        }
+
+        return SynchronousHasher<T>.GetInternal(value, null!, s_options, properties);
     }
 
     /// <summary>
@@ -79,9 +108,9 @@ public static class HashExtensions
     /// <returns>A hash code for this value based on its properties</returns>
     public static Task<int> ResolveHashAsync<T>(this T value)
     {
-        if (typeof(T).IsPrimitive || typeof(T) == typeof(string))
+        if (value.IsNullOrPrimitive(out int hash))
         {
-            return Task.FromResult(value?.GetHashCode() ?? 0);
+            return Task.FromResult(hash);
         }
 
         return DefaultHasher<T>.GetAsync(value, null!, s_options);
@@ -107,6 +136,11 @@ public static class HashExtensions
             throw new ArgumentNullException(nameof(propertyNames));
         }
 
+        if (value.IsNullOrPrimitive(out int hash))
+        {
+            return Task.FromResult(hash);
+        }
+
         return DefaultHasher<T>.GetAsync(value, null!, s_options, propertyNames);
     }
 
@@ -130,6 +164,11 @@ public static class HashExtensions
             throw new ArgumentNullException(nameof(properties));
         }
 
-        return new AsynchronousHasher<T>(s_options, properties).Get(value, null!);
+        if (value.IsNullOrPrimitive(out int hash))
+        {
+            return Task.FromResult(hash);
+        }
+
+        return AsynchronousHasher<T>.GetInternal(value, null!, s_options, properties);
     }
 }

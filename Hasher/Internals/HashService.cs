@@ -1,4 +1,6 @@
-﻿namespace SimpleHasher.Internals;
+﻿using SimpleHasher.Extensions;
+
+namespace SimpleHasher.Internals;
 
 internal class HashService : IHashService
 {
@@ -16,9 +18,9 @@ internal class HashService : IHashService
             return hasher.Get(value, this);
         }
 
-        if (typeof(T).IsPrimitive || typeof(T) == typeof(string) || typeof(Task).IsAssignableFrom(typeof(T)))
+        if (value.IsNullOrPrimitive(out int hash))
         {
-            return value?.GetHashCode() ?? 0;
+            return hash;
         }
 
         return DefaultHasher<T>.Get(value, this, _options);
@@ -26,12 +28,22 @@ internal class HashService : IHashService
 
     public int ResolveHash<T>(T value, params string[] propertyNames)
     {
+        if (value.IsNullOrPrimitive(out int hash))
+        {
+            return hash;
+        }
+
         return DefaultHasher<T>.Get(value, this, _options, propertyNames);
     }
 
     public int ResolveHash<T>(T value, params Func<T, object?>[] properties)
     {
-        return new SynchronousHasher<T>(_options, properties).Get(value, this);
+        if (value.IsNullOrPrimitive(out int hash))
+        {
+            return hash;
+        }
+
+        return SynchronousHasher<T>.GetInternal(value, this, _options, properties);
     }
 
     public Task<int> ResolveHashAsync<T>(T value)
@@ -39,6 +51,11 @@ internal class HashService : IHashService
         if (_options.TryGetAsync(out IAsynchronousHasher<T>? hasher))
         {
             return hasher.Get(value, this);
+        }
+
+        if (value.IsNullOrPrimitive(out int hash))
+        {
+            return Task.FromResult(hash);
         }
 
         if (typeof(T).IsPrimitive || typeof(T) == typeof(string))
@@ -51,11 +68,21 @@ internal class HashService : IHashService
 
     public Task<int> ResolveHashAsync<T>(T value, params string[] propertyNames)
     {
+        if (value.IsNullOrPrimitive(out int hash))
+        {
+            return Task.FromResult(hash);
+        }
+
         return DefaultHasher<T>.GetAsync(value, this, _options, propertyNames);
     }
 
     public Task<int> ResolveHashAsync<T>(T value, params Func<T, Task<object?>>[] properties)
     {
-        return new AsynchronousHasher<T>(_options, properties).Get(value, this);
+        if (value.IsNullOrPrimitive(out int hash))
+        {
+            return Task.FromResult(hash);
+        }
+
+        return AsynchronousHasher<T>.GetInternal(value, this, _options, properties);
     }
 }

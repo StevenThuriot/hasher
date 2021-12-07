@@ -58,10 +58,10 @@ serviceCollection.AddHasher();
 
 public class MyService
 {
-    private readonly IHasher _hasher;_
+    private readonly IHasher _hasher;
     public MyService(IHasher hasher)
     {
-        _hasher = hasher;_
+        _hasher = hasher;
     }
 
     public  void DoWork<T>(T value)
