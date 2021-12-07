@@ -12,10 +12,10 @@ internal interface IAsynchronousHasher<T> : IAsynchronousHasher
 
 internal sealed class AsynchronousHasher<T> : IAsynchronousHasher<T>
 {
-    private readonly HashOptions _options;
+    private readonly IHashOptionsInternal _options;
     private readonly IEnumerable<Func<T, Task<object?>>> _getters;
 
-    public AsynchronousHasher(HashOptions options, IEnumerable<Func<T, Task<object?>>> getters)
+    public AsynchronousHasher(IHashOptionsInternal options, IEnumerable<Func<T, Task<object?>>> getters)
     {
         _options = options;
         _getters = getters;
@@ -46,7 +46,7 @@ internal sealed class AsynchronousHasher<T> : IAsynchronousHasher<T>
         return Task.FromException<int>(new ArgumentException("Wrong type", nameof(value)));
     }
 
-    internal static async Task<int> GetInternal(T value, HashService service, HashOptions options, IEnumerable<Func<T, Task<object?>>> getters)
+    internal static async Task<int> GetInternal(T value, HashService service, IHashOptionsInternal options, IEnumerable<Func<T, Task<object?>>> getters)
     {
         HashCode hashCode = new();
 

@@ -2,12 +2,16 @@
 
 namespace SimpleHasher.Internals;
 
-internal class HashOptions : IHashOptions
+internal class HashOptions : IHashOptions, IHashOptionsInternal
 {
     private readonly Dictionary<Type, ISynchronousHasher> _hashers = new();
     private readonly Dictionary<Type, IAsynchronousHasher> _asyncHashers = new();
 
-    public bool CalculatedNestedHashes { get; set; } = false;
+    private bool _calculatedNestedHashes = HasherDefaults.CalculatedNestedHashes;
+    bool IHashOptionsInternal.CalculatedNestedHashes => _calculatedNestedHashes;
+
+    private bool _iterateEnumerables = HasherDefaults.IterateEnumerables;
+    bool IHashOptionsInternal.IterateEnumerables => _iterateEnumerables;
 
     internal bool TryGet<T>([NotNullWhen(true)] out ISynchronousHasher<T>? hasher)
     {
@@ -35,7 +39,25 @@ internal class HashOptions : IHashOptions
 
     public IHashOptions EnableNestedHashes()
     {
-        CalculatedNestedHashes = true;
+        _calculatedNestedHashes = true;
+        return this;
+    }
+
+    public IHashOptions DisableNestedHashes()
+    {
+        _calculatedNestedHashes = false;
+        return this;
+    }
+
+    public IHashOptions EnableIterateEnumerables()
+    {
+        _iterateEnumerables = true;
+        return this;
+    }
+
+    public IHashOptions DisableIterateEnumerables()
+    {
+        _iterateEnumerables = false;
         return this;
     }
 

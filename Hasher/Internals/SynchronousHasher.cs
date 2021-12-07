@@ -12,10 +12,10 @@ internal interface ISynchronousHasher<T> : ISynchronousHasher
 
 internal sealed class SynchronousHasher<T> : ISynchronousHasher<T>
 {
-    private readonly HashOptions _options;
+    private readonly IHashOptionsInternal _options;
     private readonly IEnumerable<Func<T, object?>> _getters;
 
-    public SynchronousHasher(HashOptions options, IEnumerable<Func<T, object?>> getters)
+    public SynchronousHasher(IHashOptionsInternal options, IEnumerable<Func<T, object?>> getters)
     {
         _options = options;
         _getters = getters;
@@ -46,7 +46,7 @@ internal sealed class SynchronousHasher<T> : ISynchronousHasher<T>
         throw new ArgumentException("Wrong type", nameof(value));
     }
 
-    internal static int GetInternal(T value, HashService service, HashOptions options, IEnumerable<Func<T, object?>> getters)
+    internal static int GetInternal(T value, HashService service, IHashOptionsInternal options, IEnumerable<Func<T, object?>> getters)
     {
         HashCode hashCode = new();
 

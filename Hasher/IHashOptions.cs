@@ -19,8 +19,28 @@ public interface IHashOptions
     IHashOptions RegisterAsync<T>(params Func<T, Task<object?>>[] values);
 
     /// <summary>
-    /// When enabled, the default hasher will try to recursively calculate hashes instead of just top level ones. Default is disabled.
+    /// When enabled, the default hasher will try to recursively calculate hashes instead of just top level ones.
     /// </summary>
-    /// <returns></returns>
     IHashOptions EnableNestedHashes();
+
+    /// <summary>
+    /// When enabled, the default hasher will try to recursively calculate hashes instead of just top level ones.
+    /// </summary>
+    IHashOptions DisableNestedHashes();
+
+    /// <summary>
+    /// When enabled, the default hasher will try to iterate enumerables to calculate a hash instead of just using the enumerables hash.
+    /// </summary>
+    IHashOptions EnableIterateEnumerables();
+
+    /// <summary>
+    /// When enabled, the default hasher will try to iterate enumerables to calculate a hash instead of just using the enumerables hash.
+    /// </summary>
+    IHashOptions DisableIterateEnumerables();
+}
+
+internal interface IHashOptionsInternal
+{
+    bool CalculatedNestedHashes { get; }
+    bool IterateEnumerables { get; }
 }

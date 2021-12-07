@@ -5,7 +5,13 @@ namespace SimpleHasher.Extensions;
 
 public static class HashExtensions
 {
-    private static readonly HashOptions s_options = new();
+    private class HasherOptionsProxy : IHashOptionsInternal
+    {
+        public bool CalculatedNestedHashes => HasherDefaults.CalculatedNestedHashes;
+        public bool IterateEnumerables => HasherDefaults.IterateEnumerables;
+    }
+
+    private static readonly IHashOptionsInternal s_options = new HasherOptionsProxy();
 
     internal static bool IsNullOrPrimitive<T>(this T value, [NotNullWhen(true)] out int hash)
     {

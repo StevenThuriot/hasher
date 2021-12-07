@@ -1,4 +1,5 @@
 using SimpleHasher.Extensions;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -52,6 +53,7 @@ public class MyClass
     public int MyProperty1 { get; set; } = 1;
     public Task<int> MyProperty2 { get; set; } = Task.FromResult(2);
     public MyClass2 MyProperty3 { get; set; } = new();
+    public List<MyClass3> MyProperty4 { get; set; } = new List<MyClass3> { new MyClass3(), new MyClass3() };
 }
 
 public class MyClass2

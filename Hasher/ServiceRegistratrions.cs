@@ -17,7 +17,7 @@ public static class ServiceRegistratrions
         HashOptions options = new();
         configure(options);
 
-        return serviceCollection.AddSingleton(options)
+        return serviceCollection.AddSingleton<HashOptions>(options)
                                 .AddSingleton<IHashService, HashService>();
     }
 }
