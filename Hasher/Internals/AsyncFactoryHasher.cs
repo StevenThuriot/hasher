@@ -48,18 +48,25 @@ internal sealed class AsynchronousHasher<T> : IAsynchronousHasher<T>
 
     internal static async Task<int> GetInternal(T value, HashService service, IHashOptionsInternal options, IEnumerable<Func<T, Task<object?>>> getters)
     {
-        HashCode hashCode = new();
+        SimpleHashCode hashCode = new();
 
         foreach (Func<T, Task<object?>> get in getters)
         {
             object? propertyValue = await get(value).ConfigureAwait(false);
 
-            if (options.CalculatedNestedHashes && propertyValue is not null)
+            if (propertyValue is null)
             {
-                propertyValue = await NestedHashHelper.ResolveNestedHashAsync(propertyValue, service).ConfigureAwait(false);
+                hashCode.Add(0);
             }
-
-            hashCode.Add(propertyValue);
+            else if (!options.CalculatedNestedHashes)
+            {
+                hashCode.Add(propertyValue);
+            }
+            else
+            {
+                int nestedHash = await NestedHashHelper.ResolveNestedHashAsync(propertyValue, service).ConfigureAwait(false);
+                hashCode.Add(nestedHash);
+            }
         }
 
         return hashCode.ToHashCode();

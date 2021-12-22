@@ -176,7 +176,7 @@ internal static class DefaultHasher<T>
     {
         if (resolvedValue is System.Collections.IEnumerable values)
         {
-            var hashCode = new HashCode();
+            SimpleHashCode hashCode = new();
 
             foreach (object? listValue in values)
             {
@@ -195,7 +195,7 @@ internal static class DefaultHasher<T>
     {
         if (resolvedValue is System.Collections.IEnumerable values)
         {
-            var hashCode = new HashCode();
+            SimpleHashCode hashCode = new();
 
             foreach (object? listValue in values)
             {

@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net5.0;net6.0</TargetFrameworks>
-    <DefineConstants Condition=" '$(TargetFramework)' == 'netstandard2.1' ">IsDotNetStandard</DefineConstants>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>10.0</LangVersion>
@@ -19,7 +18,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>C#; HashCode</PackageTags>
     <AnalysisLevel>latest</AnalysisLevel>
-    <Version>1.3.0</Version>
+    <Version>1.5.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

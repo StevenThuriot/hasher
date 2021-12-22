@@ -2,11 +2,11 @@
 
 internal static class NestedHashHelper
 {
-    public static object ResolveNestedHash(object propertyValue, HashService? service)
+    public static int ResolveNestedHash(object propertyValue, HashService? service)
     {
         if (service is null)
         {
-#if IsDotNetStandard
+#if NETSTANDARD2_1
             return HashExtensionResolver.Get(propertyValue);
 #else
             dynamic dynamicProperty = propertyValue;
@@ -15,7 +15,7 @@ internal static class NestedHashHelper
         }
         else
         {
-#if IsDotNetStandard
+#if NETSTANDARD2_1
             return HashExtensionResolver.Get(propertyValue, service);
 #else
             dynamic dynamicProperty = propertyValue;
@@ -28,7 +28,7 @@ internal static class NestedHashHelper
     {
         if (service is null)
         {
-#if IsDotNetStandard
+#if NETSTANDARD2_1
             return HashExtensionResolver.GetAsync(propertyValue);
 #else
             dynamic dynamicProperty = propertyValue;
@@ -37,7 +37,7 @@ internal static class NestedHashHelper
         }
         else
         {
-#if IsDotNetStandard
+#if NETSTANDARD2_1
             return HashExtensionResolver.GetAsync(propertyValue, service);
 #else
             dynamic dynamicProperty = propertyValue;

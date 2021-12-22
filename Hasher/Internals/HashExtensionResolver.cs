@@ -1,4 +1,4 @@
-﻿#if IsDotNetStandard
+﻿#if NETSTANDARD2_1
 
 using SimpleHasher.Extensions;
 using SimpleHasher.Internals;

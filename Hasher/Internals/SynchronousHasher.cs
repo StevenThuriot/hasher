@@ -48,18 +48,25 @@ internal sealed class SynchronousHasher<T> : ISynchronousHasher<T>
 
     internal static int GetInternal(T value, HashService service, IHashOptionsInternal options, IEnumerable<Func<T, object?>> getters)
     {
-        HashCode hashCode = new();
+        SimpleHashCode hashCode = new();
 
         foreach (Func<T, object?> get in getters)
         {
             object? propertyValue = get(value);
 
-            if (options.CalculatedNestedHashes && propertyValue is not null)
+            if (propertyValue is null)
             {
-                propertyValue = NestedHashHelper.ResolveNestedHash(propertyValue, service);
+                hashCode.Add(0);
             }
-
-            hashCode.Add(propertyValue);
+            else if (!options.CalculatedNestedHashes)
+            {
+                hashCode.Add(propertyValue);
+            }
+            else
+            {
+                int nestedHash = NestedHashHelper.ResolveNestedHash(propertyValue, service);
+                hashCode.Add(nestedHash);
+            }
         }
 
         return hashCode.ToHashCode();

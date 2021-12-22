@@ -21,8 +21,24 @@ public static class HashExtensions
             return true;
         }
 
-        if (typeof(T).IsPrimitive || typeof(T) == typeof(string) || typeof(Task).IsAssignableFrom(typeof(T)))
+        if (typeof(T).IsPrimitive)
         {
+            hash = value.GetHashCode();
+            return true;
+        }
+
+        if (typeof(T) == typeof(string))
+        {
+            SimpleHashCode hashCode = new();
+            hashCode.Add(value);
+            hash = hashCode.ToHashCode();
+
+            return true;
+        }
+
+        if (typeof(Task).IsAssignableFrom(typeof(T)))
+        {
+            //We decided not to resolve them at this point, otherwise we wouldve gotten the result rather than the task.
             hash = value.GetHashCode();
             return true;
         }
@@ -67,11 +83,6 @@ public static class HashExtensions
             throw new ArgumentNullException(nameof(propertyNames));
         }
 
-        if (value.IsNullOrPrimitive(out int hash))
-        {
-            return hash;
-        }
-
         return DefaultHasher<T>.Get(value, null!, s_options, propertyNames);
     }
 
@@ -90,11 +101,6 @@ public static class HashExtensions
         if (properties is null || properties.Length == 0)
         {
             throw new ArgumentNullException(nameof(properties));
-        }
-
-        if (value.IsNullOrPrimitive(out int hash))
-        {
-            return hash;
         }
 
         return SynchronousHasher<T>.GetInternal(value, null!, s_options, properties);
@@ -142,11 +148,6 @@ public static class HashExtensions
             throw new ArgumentNullException(nameof(propertyNames));
         }
 
-        if (value.IsNullOrPrimitive(out int hash))
-        {
-            return Task.FromResult(hash);
-        }
-
         return DefaultHasher<T>.GetAsync(value, null!, s_options, propertyNames);
     }
 
@@ -168,11 +169,6 @@ public static class HashExtensions
         if (properties is null || properties.Length == 0)
         {
             throw new ArgumentNullException(nameof(properties));
-        }
-
-        if (value.IsNullOrPrimitive(out int hash))
-        {
-            return Task.FromResult(hash);
         }
 
         return AsynchronousHasher<T>.GetInternal(value, null!, s_options, properties);
