@@ -57,16 +57,27 @@ internal sealed class SynchronousHasher<T> : ISynchronousHasher<T>
             if (propertyValue is null)
             {
                 hashCode.Add(0);
+                continue;
             }
-            else if (!options.CalculatedNestedHashes)
+
+            if (options.IterateEnumerables && propertyValue is System.Collections.IEnumerable values)
             {
-                hashCode.Add(propertyValue);
+                foreach (object? listValue in values)
+                {
+                    hashCode.Add(NestedHashHelper.ResolveNestedHash(listValue, service));
+                }
+
+                continue;
             }
-            else
+
+            if (options.CalculatedNestedHashes)
             {
                 int nestedHash = NestedHashHelper.ResolveNestedHash(propertyValue, service);
                 hashCode.Add(nestedHash);
+                continue;
             }
+
+            hashCode.Add(propertyValue);
         }
 
         return hashCode.ToHashCode();

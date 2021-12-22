@@ -1,5 +1,6 @@
 using SimpleHasher.Extensions;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -44,6 +45,30 @@ public class Tests
     {
         var sut = new MyClass3();
         int hash = sut.ResolveHash();
+        Assert.NotEqual(0, hash);
+    }
+
+    [Fact]
+    public void HashList()
+    {
+        var sut = new MyClass();
+        int hash = sut.MyProperty4.OrderBy(x => x.MyProperty1).Select(x => x.MyProperty2).ResolveHash();
+        Assert.NotEqual(0, hash);
+    }
+
+    [Fact]
+    public void HashListComplicated()
+    {
+        var sut = new MyClass();
+        int hash = sut.ResolveHash(x => x.MyProperty1, x => x.MyProperty4.OrderBy(x => x.MyProperty1).Select(x => x.MyProperty2));
+        Assert.NotEqual(0, hash);
+    }
+
+    [Fact]
+    public async Task HashListAsync()
+    {
+        var sut = new MyClass();
+        int hash = await sut.MyProperty4.OrderBy(x => x.MyProperty1).Select(x => x.MyProperty2).ResolveHashAsync();
         Assert.NotEqual(0, hash);
     }
 }

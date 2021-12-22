@@ -117,6 +117,11 @@ internal static class DefaultHasher<T>
             return 0;
         }
 
+        if (options.IterateEnumerables && value is System.Collections.IEnumerable values)
+        {
+            return ResolveEnumerated(values, service);
+        }
+
         return SynchronousHasher<T>.GetInternal(value, service, options, getters.Select<DefaultHasher<T>.HashInfo, Func<T, object?>>(x =>
         {
             if ((options.IterateEnumerables || x.ResolveByEnumeration) && x.IsEnumerable)
@@ -135,6 +140,11 @@ internal static class DefaultHasher<T>
         if (value is null)
         {
             return Task.FromResult(0);
+        }
+
+        if (options.IterateEnumerables && value is System.Collections.IEnumerable values)
+        {
+            return ResolveEnumeratedAsync(values, service);
         }
 
         return AsynchronousHasher<T>.GetInternal(value, service, options, getters.Select(x =>
@@ -170,41 +180,54 @@ internal static class DefaultHasher<T>
         }));
     }
 
-    private static object? ResolveEnumerated(HashInfo x, T v, HashService? service) => ResolveEnumerated(x.Getter.Value(v), service);
-
-    private static object? ResolveEnumerated(object? resolvedValue, HashService? service)
+    private static object? ResolveEnumerated(HashInfo x, T v, HashService? service)
     {
+        object? resolvedValue = x.Getter.Value(v);
+
         if (resolvedValue is System.Collections.IEnumerable values)
         {
-            SimpleHashCode hashCode = new();
-
-            foreach (object? listValue in values)
-            {
-                hashCode.Add(NestedHashHelper.ResolveNestedHash(listValue, service));
-            }
-
-            return hashCode.ToHashCode();
+            return ResolveEnumerated(values, service);
         }
 
         return resolvedValue;
     }
 
-    private static Task<object?> ResolveEnumeratedAsync(HashInfo x, T v, HashService? service) => ResolveEnumeratedAsync(x.Getter.Value(v), service);
+    private static int ResolveEnumerated(System.Collections.IEnumerable values, HashService? service)
+    {
+        SimpleHashCode hashCode = new();
+
+        foreach (object? listValue in values)
+        {
+            hashCode.Add(NestedHashHelper.ResolveNestedHash(listValue, service));
+        }
+
+        return hashCode.ToHashCode();
+    }
+
+    private static Task<object?> ResolveEnumeratedAsync(HashInfo x, T v, HashService? service)
+    {
+        return ResolveEnumeratedAsync(x.Getter.Value(v), service);
+    }
 
     private static async Task<object?> ResolveEnumeratedAsync(object? resolvedValue, HashService? service)
     {
         if (resolvedValue is System.Collections.IEnumerable values)
         {
-            SimpleHashCode hashCode = new();
-
-            foreach (object? listValue in values)
-            {
-                hashCode.Add(await NestedHashHelper.ResolveNestedHashAsync(listValue, service));
-            }
-
-            return hashCode.ToHashCode();
+            return (await ResolveEnumeratedAsync(values, service));
         }
 
         return resolvedValue;
+    }
+
+    private static async Task<int> ResolveEnumeratedAsync(System.Collections.IEnumerable values, HashService? service)
+    {
+        SimpleHashCode hashCode = new();
+
+        foreach (object? listValue in values)
+        {
+            hashCode.Add(await NestedHashHelper.ResolveNestedHashAsync(listValue, service));
+        }
+
+        return hashCode.ToHashCode();
     }
 }

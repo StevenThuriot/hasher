@@ -57,16 +57,27 @@ internal sealed class AsynchronousHasher<T> : IAsynchronousHasher<T>
             if (propertyValue is null)
             {
                 hashCode.Add(0);
+                continue;
             }
-            else if (!options.CalculatedNestedHashes)
+
+            if (options.IterateEnumerables && propertyValue is System.Collections.IEnumerable values)
             {
-                hashCode.Add(propertyValue);
+                foreach (object? listValue in values)
+                {
+                    hashCode.Add(await NestedHashHelper.ResolveNestedHashAsync(listValue, service));
+                }
+
+                continue;
             }
-            else
+
+            if (options.CalculatedNestedHashes)
             {
                 int nestedHash = await NestedHashHelper.ResolveNestedHashAsync(propertyValue, service).ConfigureAwait(false);
                 hashCode.Add(nestedHash);
+                continue;
             }
+
+            hashCode.Add(propertyValue);
         }
 
         return hashCode.ToHashCode();
