@@ -54,6 +54,7 @@ public class MyClass
     public Task<int> MyProperty2 { get; set; } = Task.FromResult(2);
     public MyClass2 MyProperty3 { get; set; } = new();
     public List<MyClass3> MyProperty4 { get; set; } = new List<MyClass3> { new MyClass3(), new MyClass3() };
+    public string MyProperty5 { get; set; } = ";lkjgao;khgja;odkgjs;dlkgjsdlkgj;sldkjgjhs;dklgjh;sdklfgjh";
 }
 
 public class MyClass2

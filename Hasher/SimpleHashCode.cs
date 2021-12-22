@@ -78,18 +78,34 @@ internal struct SimpleHashCode
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Add(char value) => Add((int)(value | ((uint)value << 16)));
 
     public void Add(string value)
     {
         if (value is not null)
         {
-            for (int i = 0; i < value.Length; i++)
+            unchecked
             {
-                Add(value[i]);
+                int hash1 = (5381 << 16) + 5381;
+                int hash2 = hash1;
+
+                for (int i = 0; i < value.Length; i += 2)
+                {
+                    hash1 = ((hash1 << 5) + hash1) ^ value[i];
+
+                    if (i == value.Length - 1)
+                    {
+                        break;
+                    }
+
+                    hash2 = ((hash2 << 5) + hash2) ^ value[i + 1];
+                }
+
+                Add(hash1 + (hash2 * 1566083941));
             }
 
-            Add('\0');
+            Add('\0'); //An empty string still hashes differently from a null string this way
         }
         else
         {
